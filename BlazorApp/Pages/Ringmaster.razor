@@ -1,0 +1,28 @@
+﻿@page "/ringmaster"
+
+<label for="classes"><h3>Build</h3></label>
+<br />
+<select name="classes" id="classes" @bind="currentBuild">
+    <option value="Tank">Tank</option>
+    <option value="Damage">Damage</option>
+
+</select>
+
+@code {
+
+    private string _build;
+    public string currentBuild
+    {
+        get { return _build; }
+        set
+        {
+            _build = value;
+            ChangeBuild();
+        }
+    }
+
+    private void ChangeBuild()
+    {
+        //
+    }
+}

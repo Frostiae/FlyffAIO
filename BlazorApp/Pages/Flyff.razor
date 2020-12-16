@@ -1,0 +1,23 @@
+﻿@page "/flyff"
+
+<h1>Fly For Fun Analytics tool created by Frostiae.</h1>
+This tool was created in order to accurately simulate output values of all classes given a set of inputs.
+
+@code {
+
+    private string _build;
+    public string currentBuild
+    {
+        get { return _build;}
+        set
+        {
+            _build = value;
+            ChangeBuild();
+        }
+    }
+
+    private void ChangeBuild()
+    {
+        //
+    }
+}

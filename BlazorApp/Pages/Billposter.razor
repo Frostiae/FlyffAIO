@@ -1,0 +1,107 @@
+﻿@page "/billposter"
+
+<h3>Build</h3>
+<select name="classes">
+    <option value="Tank">Tank</option>
+    <option value="Damage">Damage</option>
+</select>
+<br />
+<br />
+<table border="0" cellspacing="10">
+    <tbody>
+        <tr>
+            <td>STR</td>
+            <td><input type="number" @bind="m_str"/></td>
+        </tr>
+        <tr>
+            <td>STA</td>
+            <td><input type="number" @bind="m_sta"/></td>
+        </tr>
+        <tr>
+            <td>DEX</td>
+            <td><input type="number" @bind="m_dex"/></td>
+        </tr>
+        <tr>
+            <td>INT</td>
+            <td><input type="number" @bind="m_int"/></td>
+        </tr>
+    </tbody>
+</table>
+<br />
+<br />
+<p>Asal damage: <strong>@asalDamage</strong></p>
+
+@code {
+
+    private Player player = new Player();
+
+    private string _build;
+    public string currentBuild
+    {
+        get { return _build;}
+        set
+        {
+            _build = value;
+            ChangeBuild();
+        }
+    }
+
+    private int _str = 15;
+    private int _sta = 15;
+    private int _dex = 15;
+    private int _int = 15;
+
+    private int m_str
+    {
+        get { return _str;}
+        set
+        {
+            _str = value;
+            ChangeStats();
+        }
+    }
+    private int m_dex
+    {
+        get { return _dex;}
+        set
+        {
+            _dex = value;
+            ChangeStats();
+        }
+    }
+    private int m_int
+    {
+        get { return _int;}
+        set
+        {
+            _int = value;
+            ChangeStats();
+        }
+    }
+    private int m_sta
+    {
+        get { return _sta;}
+        set
+        {
+            _sta = value;
+            ChangeStats();
+        }
+    }
+
+    private double asalDamage = 0;
+
+    private void ChangeBuild()
+    {
+        //
+    }
+
+    private void ChangeStats()
+    {
+        player.m_str = _str;
+        player.m_dex = _dex;
+        player.m_int = _int;
+        player.m_sta = _sta;
+
+        asalDamage = player.GetAsalDamage();
+    }
+}

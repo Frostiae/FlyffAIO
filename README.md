@@ -1,1 +1,2 @@
-FlyffAIO
+FlyffAnalyticsTool
+yes

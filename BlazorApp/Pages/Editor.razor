@@ -1,0 +1,19 @@
+﻿@page "/editor"
+
+<h1>Counter</h1>
+<BECanvas Width="800" Height="400" @ref="_canvasReference"></BECanvas>
+<p>Current count: @currentCount</p>
+
+@code {
+    private int currentCount = 0;
+    private WebGLContext _context;
+    protected BECanvasComponent _canvasReference;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+    this._context = await this._canvasReference.CreateWebGLAsync();
+    
+    await this._context.ClearColorAsync(1, 0, 0, 1);
+    await this._context.ClearAsync(BufferBits.COLOR_BUFFER_BIT);
+    }
+}

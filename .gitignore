@@ -15,6 +15,9 @@ downloads/
 eggs/
 .eggs/
 lib/
+obj/
+bin/
+.vs/
 lib64/
 parts/
 sdist/
@@ -53,6 +56,8 @@ coverage.xml
 # Translations
 *.mo
 *.pot
+
+*.pdb
 
 # Django stuff:
 *.log

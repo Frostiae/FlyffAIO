@@ -1,0 +1,35 @@
+﻿@page "/monstersort"
+
+<h1>Monster Sorter</h1>
+<p>This tool sorts all the monsters from an X-Legend game client into an output folder, grouping the models with the corresponding textures and animations.</p>
+<p>Biology folder: <input type="text" @bind="_inputPath" /></p>
+<p>Output folder: <input type="text" @bind="_outputPath" /></p>
+<p><button @onclick="FindFolder">Run </button></p>
+
+@code {
+    private string inputPath;
+    public string _inputPath
+    {
+        get { return inputPath; }
+        set
+        {
+            inputPath = value;
+        }
+    }
+
+    private string outputPath;
+    public string _outputPath
+    {
+        get { return outputPath; }
+        set
+        {
+            outputPath = value;
+        }
+    }
+
+    private void FindFolder()
+    {
+        Monsters folder = new Monsters();
+        folder.AeriaMonstersPath(inputPath, outputPath);
+    }
+}
