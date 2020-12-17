@@ -7,6 +7,7 @@
   <ItemGroup>
     <PackageReference Include="Blazor.Extensions.Canvas" Version="1.0.0" />
     <PackageReference Include="ElectronNET.API" Version="9.31.2" />
+    <PackageReference Include="GlmNet" Version="0.7.0" />
   </ItemGroup>
   <ItemGroup>
     <Content Update="electron.manifest.json">
