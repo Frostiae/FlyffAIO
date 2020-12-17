@@ -64,15 +64,16 @@
 
     <script src="_framework/blazor.server.js"></script>
     <script src="_content/Blazor.Extensions.Canvas/blazor.extensions.canvas.js"></script>
-    <script>
-        function gameLoop(timeStamp) {
-            window.requestAnimationFrame(gameLoop);
-            theInstance.invokeMethodAsync('GameLoop');
-        }
 
-        window.initGame = (instance) => {
-            window.theInstance = instance;
-            window.requestAnimationFrame(gameLoop);
+    <script type="text/javascript">
+        window.anim = {
+            start: function (instance, uniformlocation) {
+                return window.requestAnimationFrame(function (timestamp) { anim.callback(instance, uniformlocation); });
+            },
+            callback: function (instance, uniformlocation) {
+                instance.invokeMethodAsync('eventRequestAnimationFrame', performance.now(), uniformlocation);
+                var callbackId = window.requestAnimationFrame(function (timestamp) { anim.callback(instance, uniformlocation); });
+            }
         };
     </script>
 </body>
