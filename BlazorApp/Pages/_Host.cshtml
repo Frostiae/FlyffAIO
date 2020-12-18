@@ -66,13 +66,42 @@
     <script src="_content/Blazor.Extensions.Canvas/blazor.extensions.canvas.js"></script>
 
     <script type="text/javascript">
+        var canRender = true;
+        var counter = 0;
+        var fps;
+
         window.anim = {
-            start: function (instance, uniformlocation) {
-                return window.requestAnimationFrame(function (timestamp) { anim.callback(instance, uniformlocation); });
+            start: async function (instance, uniformlocation) {
+                setInterval(function () {
+                    canRender = true;
+                }, 16);
+
+                setInterval(function () { // FPS counter shit
+                    fps = counter;
+                    console.log(fps);
+                    counter = 0;
+                }, 1000);
+                return await window.requestAnimationFrame(async function (timestamp) { await anim.callback(instance, uniformlocation); });
             },
-            callback: function (instance, uniformlocation) {
-                instance.invokeMethodAsync('eventRequestAnimationFrame', performance.now(), uniformlocation);
-                var callbackId = window.requestAnimationFrame(function (timestamp) { anim.callback(instance, uniformlocation); });
+            callback: async function (instance, uniformlocation) {
+                console.log('test');
+                if (canRender) {
+                    await instance.invokeMethodAsync('eventRequestAnimationFrame', performance.now(), uniformlocation);
+                    counter++;
+                    canRender = false;
+                }
+                var callbackId = await window.requestAnimationFrame(async function (timestamp) { await anim.callback(instance, uniformlocation); });
+            },
+
+            loadTexture: function (filename) {
+                canvas = document.querySelector("#editorCanvasContainer>canvas")
+                var gl = canvas.getContext("webgl");
+
+                var image = new Image();
+                image.src = filename;
+                image.addEventListener('load', function () {
+                    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+                });
             }
         };
     </script>

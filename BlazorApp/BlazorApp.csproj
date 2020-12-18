@@ -5,9 +5,16 @@
     <UseWindowsForms>true</UseWindowsForms>
   </PropertyGroup>
   <ItemGroup>
+    <Content Remove="wwwroot\img\create.png" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Blazor.Extensions.Canvas" Version="1.0.0" />
     <PackageReference Include="ElectronNET.API" Version="9.31.2" />
     <PackageReference Include="GlmNet" Version="0.7.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="3.2.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="wwwroot\img\create.png" />
   </ItemGroup>
   <ItemGroup>
     <Content Update="electron.manifest.json">
