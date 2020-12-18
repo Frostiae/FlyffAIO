@@ -9,7 +9,6 @@ using System.Numerics;
 using GlmNet;
 using Microsoft.JSInterop;
 
-
 namespace BlazorApp
 {
     public class Vertex : ComponentBase
@@ -118,9 +117,11 @@ namespace BlazorApp
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
         {
+            
             if (firstRender)
             {
                 var dotNetReference = DotNetObjectReference.Create(this);
+
                 this._context = await this._canvasReference.CreateWebGLAsync();
 
                 await _context.ClearColorAsync(0.75f, 0.85f, 0.8f, 0.0f);
@@ -164,7 +165,7 @@ namespace BlazorApp
                 await _context.TexParameterAsync(TextureType.TEXTURE_2D, TextureParameter.TEXTURE_MIN_FILTER, (float)TextureParameterValue.LINEAR);
                 await _context.TexParameterAsync(TextureType.TEXTURE_2D, TextureParameter.TEXTURE_MAG_FILTER, (float)TextureParameterValue.LINEAR);
 
-                await JSRuntime.InvokeVoidAsync("anim.loadTexture", "/img/create.png");
+                await JSRuntime.InvokeVoidAsync("anim.loadTexture", "/assets/create.png");
                 await _context.BindTextureAsync(TextureType.TEXTURE_2D, null);
 
                 await this._context.UseProgramAsync(program); // Tell OpenGl which program should be active
@@ -183,8 +184,6 @@ namespace BlazorApp
                 await _context.UniformMatrixAsync(matWorldUniformLocation, false, worldMatrix.to_array());
                 await _context.UniformMatrixAsync(matViewUniformLocation, false, viewMatrix.to_array());
                 await _context.UniformMatrixAsync(matProjUniformLocation, false, projMatrix.to_array());
-
-                // Here is where we WOULD do a render loop, like while (true)
 
                 //await this._context.DrawArraysAsync(Primitive.TRIANGLES, 0, 3); // type, how many to skip, how many vertices
             }

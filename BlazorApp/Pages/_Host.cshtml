@@ -102,6 +102,29 @@
                 image.addEventListener('load', function () {
                     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
                 });
+            },
+
+            loadTextResource: function (url, callback) {
+                var request = new XMLHttpRequest();
+                request.open('GET', url + '?dont-cache=' + Math.random(), true);
+                request.onload = function () {
+                    if (request.status < 200 || request.status > 299) {
+                        callback('Error: HTTP status ' + request.status + ' on resource' + url);
+                    } else {
+                        callback(null, request.responseText);
+                    }
+                };
+                request.send();
+            },
+
+            loadJSONResource: function (url, callback) {
+                loadTextResource(url, function (result) {
+                    try {
+                        callback(null, JSON.parse(result));
+                    } catch (e) {
+                        callback(e);
+                    }
+                });
             }
         };
     </script>
