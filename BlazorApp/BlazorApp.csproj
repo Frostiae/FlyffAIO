@@ -8,6 +8,7 @@
     <Content Remove="wwwroot\img\create.png" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="AssimpNet" Version="4.1.0" />
     <PackageReference Include="Blazor.Extensions.Canvas" Version="1.0.0" />
     <PackageReference Include="ElectronNET.API" Version="9.31.2" />
     <PackageReference Include="GlmNet" Version="0.7.0" />

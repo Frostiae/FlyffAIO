@@ -8,6 +8,8 @@ using Blazor.Extensions;
 using System.Numerics;
 using GlmNet;
 using Microsoft.JSInterop;
+using Assimp.Configs;
+using System.IO;
 
 namespace BlazorApp
 {
@@ -17,6 +19,12 @@ namespace BlazorApp
 
         private WebGLContext _context;
         protected BECanvasComponent _canvasReference;
+        Assimp.AssimpContext importer = new Assimp.AssimpContext();
+
+        private Assimp.Scene m_model;
+        private Vector3 m_sceneCenter, m_sceneMin, m_sceneMax;
+        private float m_angle;
+
         float angle;
         mat4 worldMatrix = new mat4();
         mat4 viewMatrix = new mat4();
@@ -47,7 +55,8 @@ namespace BlazorApp
                                          uniform sampler2D sampler;
 
                                          void main() {
-                                            gl_FragColor = texture2D(sampler, fragTexCoord);
+                                            gl_FragColor = vec4(0,0,0,1);
+                                            //gl_FragColor = texture2D(sampler, fragTexCoord);
                                          }";
 
         float[] boxVertices = new[] // Using an index buffer to avoid overlap isnt working for some reason ...
@@ -117,9 +126,36 @@ namespace BlazorApp
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
         {
-            
             if (firstRender)
             {
+                importer.SetConfig(new NormalSmoothingAngleConfig(66.0f));
+                string filename = "F:\\FlyFFTools\\FlyffAIO\\BlazorApp\\Engine\\knuckle.obj";
+                m_model = importer.ImportFile(filename, Assimp.PostProcessPreset.TargetRealTimeMaximumQuality);
+                float[] knuckleVertices = new float[m_model.Meshes[0].VertexCount * 3];
+                ushort[] knuckleIndices = new ushort[m_model.Meshes[0].FaceCount * 3];
+
+                // TODO: There has to be a better way of doing this ...
+                for (int i = 0; i < m_model.Meshes[0].VertexCount * 3; i += 3)
+                {
+                    if (m_model.Meshes[0].VertexCount * 3 > i + 3)
+                    {
+                        knuckleVertices[i] = m_model.Meshes[0].Vertices[(int)MathF.Floor(i / 3)].X;
+                        knuckleVertices[i + 1] = m_model.Meshes[0].Vertices[(int)MathF.Floor(i / 3)].Y;
+                        knuckleVertices[i + 2] = m_model.Meshes[0].Vertices[(int)MathF.Floor(i / 3)].Z;
+                    }
+                }
+
+                // TODO: There has to be a better way of doing this ...
+                for (int i = 0; i < m_model.Meshes[0].FaceCount * 3; i += 3)
+                {
+                    if (m_model.Meshes[0].FaceCount * 3 > i + 3)
+                    {
+                        knuckleIndices[i] = (ushort)m_model.Meshes[0].Faces[(int)MathF.Floor(i / 3)].Indices[0];
+                        knuckleIndices[i + 1] = (ushort)m_model.Meshes[0].Faces[(int)MathF.Floor(i / 3)].Indices[1];
+                        knuckleIndices[i + 2] = (ushort)m_model.Meshes[0].Faces[(int)MathF.Floor(i / 3)].Indices[2];
+                    }
+                }
+
                 var dotNetReference = DotNetObjectReference.Create(this);
 
                 this._context = await this._canvasReference.CreateWebGLAsync();
@@ -127,31 +163,29 @@ namespace BlazorApp
                 await _context.ClearColorAsync(0.75f, 0.85f, 0.8f, 0.0f);
                 await _context.ClearAsync(BufferBits.COLOR_BUFFER_BIT | BufferBits.DEPTH_BUFFER_BIT);
 
-                // Depth testing and backface culling
-                await _context.EnableAsync(EnableCap.DEPTH_TEST);
-                await _context.EnableAsync(EnableCap.CULL_FACE);
-                await _context.CullFaceAsync(Face.BACK);
-                await _context.FrontFaceAsync(FrontFaceDirection.CCW);
+                // Depth testing and backface culling, commenting it out for testing
+                //await _context.EnableAsync(EnableCap.DEPTH_TEST);
+                //await _context.EnableAsync(EnableCap.CULL_FACE);
+                //await _context.CullFaceAsync(Face.BACK);
+                //await _context.FrontFaceAsync(FrontFaceDirection.CCW);
 
                 var program = await InitProgramAsync(this._context, VS_SOURCE, FS_SOURCE);
 
                 var vertexBuffer = await this._context.CreateBufferAsync(); // Create a buffer to pass variables to the GPU RAM.
                 await this._context.BindBufferAsync(BufferType.ARRAY_BUFFER, vertexBuffer);
+                await this._context.BufferDataAsync(BufferType.ARRAY_BUFFER, knuckleVertices, BufferUsageHint.STATIC_DRAW); // Specifying which array to pass to the GPU 
 
                 var indexBuffer = await _context.CreateBufferAsync();
                 await _context.BindBufferAsync(BufferType.ELEMENT_ARRAY_BUFFER, indexBuffer);
-
-                // Everything below here is where drawing an object is done
-                await this._context.BufferDataAsync(BufferType.ARRAY_BUFFER, boxVertices, BufferUsageHint.STATIC_DRAW); // Specifying which array to pass to the GPU 
-                await this._context.BufferDataAsync(BufferType.ELEMENT_ARRAY_BUFFER, boxIndices, BufferUsageHint.STATIC_DRAW); // index buffer
+                await this._context.BufferDataAsync(BufferType.ELEMENT_ARRAY_BUFFER, knuckleIndices, BufferUsageHint.STATIC_DRAW); // index buffer
 
                 var positionAttribLocation = await _context.GetAttribLocationAsync(program, "aPos");
-                var texCoordAttribLocation = await _context.GetAttribLocationAsync(program, "vertTexCoord");
-
-
-                await this._context.VertexAttribPointerAsync((uint)positionAttribLocation, 3, DataType.FLOAT, false, 5 * sizeof(float), 0); // index, size of the vertex, type, normalized, how much info in a vertex
-                await this._context.VertexAttribPointerAsync((uint)texCoordAttribLocation, 2, DataType.FLOAT, false, 5 * sizeof(float), 3 * sizeof(float)); //offset here because the color is on the 4th value
+                await this._context.VertexAttribPointerAsync((uint)positionAttribLocation, 3, DataType.FLOAT, false, 3 * sizeof(float), 0); // index, size of the vertex, type, normalized, how much info in a vertex
                 await this._context.EnableVertexAttribArrayAsync((uint)positionAttribLocation);
+
+                // Nothing here right now since I don't grab the texcoords yet TODO
+                var texCoordAttribLocation = await _context.GetAttribLocationAsync(program, "vertTexCoord");
+                await this._context.VertexAttribPointerAsync((uint)texCoordAttribLocation, 3, DataType.FLOAT, false, 3 * sizeof(float), 0); //offset here because the color is on the 4th value
                 await this._context.EnableVertexAttribArrayAsync((uint)texCoordAttribLocation);
 
 
@@ -207,7 +241,7 @@ namespace BlazorApp
 
             await _context.BindTextureAsync(TextureType.TEXTURE_2D, boxTexture);
             await _context.ActiveTextureAsync(Texture.TEXTURE0);
-            //await _context.ClearAsync(BufferBits.COLOR_BUFFER_BIT);
+            //await _context.ClearAsync(BufferBits.COLOR_BUFFER_BIT); // This flickers the screen really hard
             await this._context.DrawElementsAsync(Primitive.TRIANGLES, boxIndices.Length, DataType.UNSIGNED_SHORT, 0); // type, how many to skip, how many vertices
         }
         private async Task<WebGLProgram> InitProgramAsync(WebGLContext gl, string vsSource, string fsSource)

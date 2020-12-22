@@ -71,20 +71,18 @@
         var fps;
 
         window.anim = {
-            start: async function (instance, uniformlocation) {
-                setInterval(function () {
+            start: async (instance, uniformlocation) => {
+                setInterval(() => {
                     canRender = true;
                 }, 16);
 
-                setInterval(function () { // FPS counter shit
+                setInterval(() => { // FPS counter shit
                     fps = counter;
-                    console.log(fps);
                     counter = 0;
                 }, 1000);
-                return await window.requestAnimationFrame(async function (timestamp) { await anim.callback(instance, uniformlocation); });
+                return await window.requestAnimationFrame(async timestamp => { await anim.callback(instance, uniformlocation); });
             },
-            callback: async function (instance, uniformlocation) {
-                console.log('test');
+            callback: async (instance, uniformlocation) => {
                 if (canRender) {
                     await instance.invokeMethodAsync('eventRequestAnimationFrame', performance.now(), uniformlocation);
                     counter++;
